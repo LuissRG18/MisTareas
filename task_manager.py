@@ -43,8 +43,12 @@ def filter_tasks (tasks, mode):
     else:
         return tasks
 
-def edit_task(tasks, index, new_title):
+def edit_task(tasks, index, new_title, new_priority=None, new_due_date=None):
     tasks[index]["title"] = new_title
+    if new_priority is not None:
+        tasks[index]["priority"] = new_priority
+    if new_due_date is not None:
+        tasks[index]["due_date"] = new_due_date
     save_tasks(tasks)
     return tasks
 

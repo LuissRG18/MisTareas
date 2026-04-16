@@ -244,11 +244,53 @@ class TodoApp(ctk.CTk):
         self.refresh_list()
 
     def edit_task(self, index):
-        dialog = ctk.CTkInputDialog(text="Nuevo nombre:", title="Editar tarea")
-        new_title = dialog.get_input()
-        if new_title and new_title.strip():
-            self.tasks = edit_task(self.tasks, index, new_title.strip())
+        task = self.tasks[index]
+
+        win = ctk.CTkToplevel(self)
+        win.title("Editar tarea")
+        win.geometry("420x280")
+        win.resizable(False, False)
+        win.grab_set()
+
+        ctk.CTkLabel(win, text="✏  Editar tarea", font=ctk.CTkFont(size=17, weight="bold")).pack(pady=(18, 14))
+
+        form = ctk.CTkFrame(win, fg_color="transparent")
+        form.pack(padx=24, fill="x")
+
+        # Nombre
+        ctk.CTkLabel(form, text="Nombre", anchor="w").grid(row=0, column=0, sticky="w", pady=(0, 4))
+        title_var = ctk.StringVar(value=task["title"])
+        ctk.CTkEntry(form, textvariable=title_var, height=36).grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+
+        # Prioridad
+        ctk.CTkLabel(form, text="Prioridad", anchor="w").grid(row=2, column=0, sticky="w", pady=(0, 4))
+        priority_var = ctk.StringVar(value=task.get("priority", "Media"))
+        ctk.CTkOptionMenu(form, values=["Alta", "Media", "Baja"], variable=priority_var, width=140, height=36
+                          ).grid(row=3, column=0, sticky="w", pady=(0, 10))
+
+        # Fecha
+        ctk.CTkLabel(form, text="Fecha límite (DD/MM/AAAA)", anchor="w").grid(row=2, column=1, sticky="w", padx=(16, 0), pady=(0, 4))
+        date_var = ctk.StringVar(value=task.get("due_date", ""))
+        ctk.CTkEntry(form, textvariable=date_var, placeholder_text="DD/MM/AAAA", width=140, height=36
+                     ).grid(row=3, column=1, sticky="w", padx=(16, 0), pady=(0, 10))
+
+        form.columnconfigure(0, weight=1)
+        form.columnconfigure(1, weight=1)
+
+        def save():
+            new_title = title_var.get().strip()
+            if not new_title:
+                return
+            self.tasks = edit_task(
+                self.tasks, index,
+                new_title,
+                priority_var.get(),
+                date_var.get().strip()
+            )
             self.refresh_list()
+            win.destroy()
+
+        ctk.CTkButton(win, text="Guardar", height=38, command=save).pack(pady=(4, 18), padx=24, fill="x")
 
     def clear_completed(self):
         self.tasks = clear_completed(self.tasks)
